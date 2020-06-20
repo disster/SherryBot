@@ -125,19 +125,19 @@ function matchPostByTag(tag, loc, dist){
   if(list[0] == undefined)
     return p;
 
-  console.log(list[0]);
+  //console.log(list[0]);
 
   let firstSnap;
   posts.child(list[0].key).once('value', (snapshot) => { firstSnap = snapshot;});
 
-  p.donor_id = u_id;
-  p.donee_id = d_id;
-  p.message_id = msg_id;
-  p.status = status;
-  p.link = link;
-  p.image = img;
-  p.text = text;
-  p.tags = tags;
+  p.donor_id = firstSnap.child('u_id').val();
+  p.donee_id = firstSnap.child('d_id').val();
+  p.message_id = firstSnap.child('msg_id').val();
+  p.status = firstSnap.child('status').val();
+  p.link = firstSnap.child('link').val();
+  p.image = firstSnap.child('img').val();
+  p.text = firstSnap.child('text').val();
+  p.tags = firstSnap.child('tags').val();
 
   return p;
 }
@@ -216,7 +216,7 @@ bot.on('text', msg => {
 
     case 'Поиск':
 
-      matchPostByTag('lol');
+    console.log(matchPostByTag('lol'));
       replyMarkup = bot.keyboard([
         ['Поиск','Настройки']
       ], {resize: true});
