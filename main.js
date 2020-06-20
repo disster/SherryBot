@@ -63,10 +63,87 @@ function getUserPropertyValue(u_id, val_name) {
 
   return r;
 }
+<<<<<<< Updated upstream
+=======
+
+function addPost(u_id = 0, d_id = 0, msg_id = 0, status = -1, link = '', img = '', text = '', tags = [], dt = null) {
+    if(dt == null) dt = Math.round(new Date() / 1000);
+    console.log("Adding post " + msg_id + " at " + dt);
+    posts.push().set({
+        donor_id: u_id,
+        donee_id: d_id,
+        msg_id: msg_id,
+        status: status,
+        link: link,
+        image: img,
+        text: text,
+        tags: tags,
+        upload_time: dt
+      });
+}
+
+function matchPostByTag(tag, loc, dist){
+
+  function pair(key, val) {
+    this.key = key;
+    this.val = val;
+  }
+
+  let p = new Post();
+
+  let list = [];
+
+  posts.on('child_added', (snapshot) => { snapshot.forEach((child) => {
+    if(child.key == 'status')
+      if (child.val() == 1 || child.val() == 0)
+      {
+        let k = child.ref.parent.key;
+        let v;
+        posts.child(k + '/upload_time').once('value', (snapshot) => { v = snapshot.val();});
+        list.push(new pair(k, v));
+      }
+  })});
+
+  list.sort(function(a,b) {return a.val - b.val});
+
+  if(list[0] == undefined)
+    return p;
+
+  console.log(list[0]);
+
+  let firstSnap;
+  posts.child(list[0].key).once('value', (snapshot) => { firstSnap = snapshot;});
+  p.donor_id = u_id;
+  p.donee_id = d_id;
+  p.message_id = msg_id;
+  p.status = status;
+  p.link = link;
+  p.image = img;
+  p.text = text;
+  p.tags = tags;
+
+  return p;
+}
+
+function calcDistOnGlobe(long1, lat1, long2, lat2) {
+  var R = 6371;
+
+  var dLat = (lat2-lat1).toRad();
+  var dLong = (long2-long1).toRad();
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) *
+                    Math.sin(dLong/2) * Math.sin(dLong/2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  var dist = R * c;
+
+  return Math.round(dist);
+}
+
+>>>>>>> Stashed changes
 function setPostsInDb(){
   let parser = require("./parser");
   let posts = parser.getPosts('sharingfood', 500);
-  //console.log(posts);
+  console.log(posts);
 }
 ///////////////////////////////////////////////////////////////
 //                          BOT
@@ -161,6 +238,5 @@ bot.on('location', msg => {
 
   return bot.sendMessage(msg.from.id, 'Местоположение установлено!', {replyMarkup});
 });
-//setPostsInDb();
 bot.start();
 
