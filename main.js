@@ -1,7 +1,6 @@
 const TeleBot = require('telebot');
 const bot = new TeleBot('1125357561:AAFGNZcowSJAKjR-XZ6Pr6Nc9glGl-znTxQ');
 const firebase = require('firebase');
-
 ///////////////////////////////////////////////////////////////
 //                       DATABASE
 ///////////////////////////////////////////////////////////////
@@ -54,9 +53,7 @@ function setUserGeo(u_id, long, lat){
 }
 
 function getUserPropertyValue(u_id, val_name) {
-
   var r = null;
-
   users.orderByChild("user_id").equalTo(u_id).on("child_added", snapshot => {
     users.child(snapshot.key + '/' + val_name).orderByChild(val_name).once("value", snapshot => {
       console.log("Func ref: " + snapshot.key + " --- Func val: " + snapshot.val());
@@ -66,7 +63,11 @@ function getUserPropertyValue(u_id, val_name) {
 
   return r;
 }
-
+function setPostsInDb(){
+  let parser = require("./parser");
+  let posts = parser.getPosts('sharingfood', 500);
+  console.log(posts);
+}
 ///////////////////////////////////////////////////////////////
 //                          BOT
 ///////////////////////////////////////////////////////////////
@@ -81,9 +82,7 @@ bot.on(['/start','/role'], msg => {
     [bot.inlineButton('Я отдаю', {callback: 'donor'})],
     [bot.inlineButton('Я принимаю', {callback: 'donee'})]
   ]);
-
     addUser(msg.from.id);
-
     return bot.sendMessage(msg.from.id, 'Здравствуйте, ' + msg.from.first_name + '! Вы отдающая или принимающая сторона?', {replyMarkup});
 });
 
@@ -94,26 +93,18 @@ bot.on('callbackQuery', msg => {
     switch (msg.data) {
       case 'donor':
           setUserStatus(true, msg.from.id);
-
           replyMarkup = bot.keyboard([
             ['Создать объявление','Настройки']
           ], {resize: true});
-
         break;
-
       case 'donee':
           setUserStatus(false, msg.from.id);
-
           replyMarkup = bot.keyboard([
             ['Поиск','Настройки']
           ], {resize: true});
-
         break;
-
       default:
-
     }
-
     return bot.sendMessage(msg.from.id, 'Готово!', {replyMarkup});
 });
 
@@ -173,3 +164,4 @@ bot.on('location', msg => {
 });
 
 bot.start();
+
