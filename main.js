@@ -2,6 +2,23 @@ const TeleBot = require('telebot');
 const bot = new TeleBot('1125357561:AAFGNZcowSJAKjR-XZ6Pr6Nc9glGl-znTxQ');
 const firebase = require('firebase');
 ///////////////////////////////////////////////////////////////
+//                       CLASSES
+///////////////////////////////////////////////////////////////
+
+class Post {
+  constructor(u_id, d_id, msg_id, status, link, img, text, tags) {
+    this.donor_id = u_id;
+    this.donee_id = d_id;
+    this.message_id = msg_id;
+    this.status = status;
+    this.link = link;
+    this.image = img;
+    this.text = text;
+    this.tags = tags;
+  }
+}
+
+///////////////////////////////////////////////////////////////
 //                       DATABASE
 ///////////////////////////////////////////////////////////////
 
@@ -16,6 +33,7 @@ const app = firebase.initializeApp({
 
 const ref = firebase.database().ref();
 const users = ref.child("users");
+const posts = ref.child("posts");
 
 function addUser(u_id) {
   if(users.orderByChild("user_id").equalTo(u_id).once("value",snapshot => {
@@ -63,8 +81,6 @@ function getUserPropertyValue(u_id, val_name) {
 
   return r;
 }
-<<<<<<< Updated upstream
-=======
 
 function addPost(u_id = 0, d_id = 0, msg_id = 0, status = -1, link = '', img = '', text = '', tags = [], dt = null) {
     if(dt == null) dt = Math.round(new Date() / 1000);
@@ -82,7 +98,7 @@ function addPost(u_id = 0, d_id = 0, msg_id = 0, status = -1, link = '', img = '
       });
 }
 
-function matchPostByTag(tag, loc, dist){
+function matchPostByTag(tag = '', loc = '', dist = ''){
 
   function pair(key, val) {
     this.key = key;
@@ -108,19 +124,21 @@ function matchPostByTag(tag, loc, dist){
 
   if(list[0] == undefined)
     return p;
-
-  console.log(list[0]);
+  
+  //console.log(list[0]);
 
   let firstSnap;
   posts.child(list[0].key).once('value', (snapshot) => { firstSnap = snapshot;});
-  p.donor_id = u_id;
-  p.donee_id = d_id;
-  p.message_id = msg_id;
-  p.status = status;
-  p.link = link;
-  p.image = img;
-  p.text = text;
-  p.tags = tags;
+
+  p.donor_id = firstSnap.child('u_id').val();
+  p.donee_id = firstSnap.child('d_id').val();
+  p.message_id = firstSnap.child('msg_id').val();
+  p.status = firstSnap.child('status').val();
+  p.link = firstSnap.child('link').val();
+  p.image = firstSnap.child('img').val();
+  p.text = firstSnap.child('text').val();
+  p.tags = firstSnap.child('tags').val();
+  p.upload_time = firstSnap.child('upload_time').val();
 
   return p;
 }
@@ -139,11 +157,11 @@ function calcDistOnGlobe(long1, lat1, long2, lat2) {
   return Math.round(dist);
 }
 
->>>>>>> Stashed changes
+
 function setPostsInDb(){
   let parser = require("./parser");
-  let posts = parser.getPosts('sharingfood', 500);
-  console.log(posts);
+  let postsArr = parser.getPosts('sharingfood', 500);
+  console.log(postsArr);
 }
 ///////////////////////////////////////////////////////////////
 //                          BOT
@@ -173,16 +191,15 @@ bot.on('callbackQuery', msg => {
           replyMarkup = bot.keyboard([
             ['Создать объявление','Настройки']
           ], {resize: true});
-        break;
+        return bot.sendMessage(msg.from.id, 'Роль установлена на отдающего!', {replyMarkup});
+
       case 'donee':
           setUserStatus(false, msg.from.id);
           replyMarkup = bot.keyboard([
             ['Поиск','Настройки']
           ], {resize: true});
-        break;
-      default:
+        return bot.sendMessage(msg.from.id, 'Роль установлена на принимающего!', {replyMarkup});
     }
-    return bot.sendMessage(msg.from.id, 'Готово!', {replyMarkup});
 });
 
 bot.on('text', msg => {
@@ -190,6 +207,30 @@ bot.on('text', msg => {
   let replyMarkup = null;
 
   switch (msg.text) {
+
+    case 'Создать объявление':
+
+      addPost(msg.from.id, 0, msg.message_id, 1)
+      replyMarkup = bot.keyboard([
+        ['Создать объявление','Настройки']
+      ], {resize: true});
+      return bot.sendMessage(msg.from.id, 'Объявление создано!', {replyMarkup});
+
+    case 'Поиск':
+
+    let p = matchPostByTag();
+
+    if(p.status == 0){
+      replyMarkup = bot.inlineKeyboard([
+        [bot.inlineButton('Ссылка на пост', {url: p.link})]
+      ], {resize: true});
+    } else {
+      replyMarkup = bot.inlineKeyboard([
+        [bot.inlineButton('Забронировать', {callback: 'reserve'})]
+      ], {resize: true});
+    }
+      return bot.sendPhoto(msg.from.id, p.image, p.text, {replyMarkup});
+
     case 'Настройки':
       replyMarkup = bot.keyboard([
         [bot.button('location', 'Установить местоположение')],
@@ -239,4 +280,3 @@ bot.on('location', msg => {
   return bot.sendMessage(msg.from.id, 'Местоположение установлено!', {replyMarkup});
 });
 bot.start();
-
