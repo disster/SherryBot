@@ -98,7 +98,7 @@ function addPost(u_id = 0, d_id = 0, msg_id = 0, status = -1, link = '', img = '
       });
 }
 
-function matchPostByTag(tag, loc, dist){
+function matchPostByTag(tag = '', loc = '', dist = ''){
 
   function pair(key, val) {
     this.key = key;
@@ -138,6 +138,7 @@ function matchPostByTag(tag, loc, dist){
   p.image = firstSnap.child('img').val();
   p.text = firstSnap.child('text').val();
   p.tags = firstSnap.child('tags').val();
+  p.upload_time = firstSnap.child('upload_time').val();
 
   return p;
 }
@@ -158,8 +159,8 @@ function calcDistOnGlobe(long1, lat1, long2, lat2) {
 
 function setPostsInDb(){
   let parser = require("./parser");
-  let posts = parser.getPosts('sharingfood', 500);
-  console.log(posts);
+  let postsArr = parser.getPosts('sharingfood', 500);
+  console.log(postsArr);
 }
 ///////////////////////////////////////////////////////////////
 //                          BOT
@@ -208,7 +209,7 @@ bot.on('text', msg => {
 
     case 'Создать объявление':
 
-      addPost(0,0,0,1);
+      addPost(msg.from.id, 0, msg.message_id, 1)
       replyMarkup = bot.keyboard([
         ['Создать объявление','Настройки']
       ], {resize: true});
@@ -216,11 +217,18 @@ bot.on('text', msg => {
 
     case 'Поиск':
 
-    console.log(matchPostByTag('lol'));
-      replyMarkup = bot.keyboard([
-        ['Поиск','Настройки']
+    let p = matchPostByTag();
+
+    if(p.status == 0){
+      replyMarkup = bot.inlineKeyboard([
+        [bot.inlineButton('Ссылка на пост', {url: p.link})]
       ], {resize: true});
-      return bot.sendMessage(msg.from.id, 'Объявления найдены!', {replyMarkup});
+    } else {
+      replyMarkup = bot.inlineKeyboard([
+        [bot.inlineButton('Забронировать', {callback: 'reserve'})]
+      ], {resize: true});
+    }
+      return bot.sendPhoto(msg.from.id, p.image, p.text, {replyMarkup});
 
     case 'Настройки':
       replyMarkup = bot.keyboard([
