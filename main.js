@@ -132,8 +132,10 @@ function matchPostByTag(tag = '', loc = '', dist = '') {
 
     //console.log(list[0]);
 
+    i = Math.round(Math.random() * list.length);
+
     let firstSnap;
-    posts.child(list[0].key).once('value', (snapshot) => {
+    posts.child(list[i].key).once('value', (snapshot) => {
         firstSnap = snapshot;
     });
 
@@ -142,7 +144,7 @@ function matchPostByTag(tag = '', loc = '', dist = '') {
     p.message_id = firstSnap.child('msg_id').val();
     p.status = firstSnap.child('status').val();
     p.link = firstSnap.child('link').val();
-    p.image = firstSnap.child('img').val();
+    p.image = firstSnap.child('image').val();
     p.text = firstSnap.child('text').val();
     p.tags = firstSnap.child('tags').val();
     p.upload_time = firstSnap.child('upload_time').val();
@@ -244,7 +246,9 @@ bot.on('text', msg => {
                     [bot.inlineButton('Забронировать', {callback: 'reserve'})]
                 ], {resize: true});
             }
-            return bot.sendPhoto(msg.from.id, p.image, p.text, {replyMarkup});
+            bot.sendPhoto(msg.from.id, p.image, 'img').then(() => {
+            bot.sendMessage(msg.from.id, p.text, {replyMarkup});});
+            return null;
 
         case 'Настройки':
             replyMarkup = bot.keyboard([
