@@ -124,7 +124,7 @@ function matchPostByTag(tag = '', loc = '', dist = ''){
 
   if(list[0] == undefined)
     return p;
-
+  
   //console.log(list[0]);
 
   let firstSnap;
@@ -156,6 +156,7 @@ function calcDistOnGlobe(long1, lat1, long2, lat2) {
 
   return Math.round(dist);
 }
+
 
 function setPostsInDb(){
   let parser = require("./parser");
@@ -278,5 +279,4 @@ bot.on('location', msg => {
 
   return bot.sendMessage(msg.from.id, 'Местоположение установлено!', {replyMarkup});
 });
-//setPostsInDb();
 bot.start();

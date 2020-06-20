@@ -24,12 +24,17 @@ exports.getPosts = function (group, totalCount) {
                     }
                 }
             }
-            let postUrl = `https://vk.com/sharingfood?w=wall${data[i].owner_id}_${data[i].id}`
+            let postUrl = `https://vk.com/sharingfood?w=wall${data[i].owner_id}_${data[i].id}`;
+            let status = 0;
+            // if (!data[i].text.toLowerCase().match(/(^|\A|\s|\-)[Зз]абр(али|ал|ала|ало)?[^а-яА-Я]*?(\s|$|\Z|\-)/)) {
+            //     status = 3;
+            // }
             data[i] = {
-                postUrl: postUrl,
-                date: data[i].date,
-                text: data[i].text,
-                images: images
+                status: status,
+                link: postUrl,
+                image: images[0],
+                upload_time: data[i].date,
+                text: data[i].text
             }
         }
         offset += 100;
