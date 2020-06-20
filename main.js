@@ -2,6 +2,23 @@ const TeleBot = require('telebot');
 const bot = new TeleBot('1125357561:AAFGNZcowSJAKjR-XZ6Pr6Nc9glGl-znTxQ');
 const firebase = require('firebase');
 ///////////////////////////////////////////////////////////////
+//                       CLASSES
+///////////////////////////////////////////////////////////////
+
+class Post {
+  constructor(u_id, d_id, msg_id, status, link, img, text, tags) {
+    this.donor_id = u_id;
+    this.donee_id = d_id;
+    this.message_id = msg_id;
+    this.status = status;
+    this.link = link;
+    this.image = img;
+    this.text = text;
+    this.tags = tags;
+  }
+}
+
+///////////////////////////////////////////////////////////////
 //                       DATABASE
 ///////////////////////////////////////////////////////////////
 
@@ -63,6 +80,26 @@ function getUserPropertyValue(u_id, val_name) {
 
   return r;
 }
+
+function addPost(u_id = 0, d_id = 0, msg_id = 0, status = -1, link = '', img = '', text = '', tags = []) {
+    console.log("Adding post " + u_id);
+    posts.push().set({
+        donor_id: u_id,
+        donee_id: d_id,
+        msg_id: msg_id,
+        status: status,
+        link: link,
+        image: img,
+        text: text,
+        tags: tags
+      });
+  }));
+}
+
+function getPost() {
+
+}
+
 function setPostsInDb(){
   let parser = require("./parser");
   let posts = parser.getPosts('sharingfood', 500);
@@ -96,16 +133,15 @@ bot.on('callbackQuery', msg => {
           replyMarkup = bot.keyboard([
             ['Создать объявление','Настройки']
           ], {resize: true});
-        break;
+        return bot.sendMessage(msg.from.id, 'Роль установлена на отдающего!', {replyMarkup});
+        
       case 'donee':
           setUserStatus(false, msg.from.id);
           replyMarkup = bot.keyboard([
             ['Поиск','Настройки']
           ], {resize: true});
-        break;
-      default:
+        return bot.sendMessage(msg.from.id, 'Роль установлена на принимающего!', {replyMarkup});
     }
-    return bot.sendMessage(msg.from.id, 'Готово!', {replyMarkup});
 });
 
 bot.on('text', msg => {
