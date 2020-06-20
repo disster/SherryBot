@@ -159,7 +159,7 @@ function calcDistOnGlobe(long1, lat1, long2, lat2) {
 function setPostsInDb(){
   let parser = require("./parser");
   let posts = parser.getPosts('sharingfood', 500);
-  console.log(posts);
+  //console.log(posts);
 }
 ///////////////////////////////////////////////////////////////
 //                          BOT
@@ -248,7 +248,6 @@ bot.on('text', msg => {
         ], {resize: true});
       }
       return bot.sendMessage(msg.from.id, 'Возвращаю в главное меню.', {replyMarkup});
-
     default:
   }
 });
@@ -271,5 +270,5 @@ bot.on('location', msg => {
 
   return bot.sendMessage(msg.from.id, 'Местоположение установлено!', {replyMarkup});
 });
-
+//setPostsInDb();
 bot.start();
