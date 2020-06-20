@@ -98,6 +98,12 @@ function addPost(u_id = 0, d_id = 0, msg_id = 0, status = -1, link = '', img = '
     });
 }
 
+function trackPostValues(msg_id, post) {
+
+  let p = post;
+
+}
+
 function matchPostByTag(tag = '', loc = '', dist = '') {
 
     function pair(key, val) {
@@ -169,7 +175,7 @@ function calcDistOnGlobe(long1, lat1, long2, lat2) {
 
 function setPostsInDb() {
     let parser = require("./parser");
-    let postsArr = parser.getPosts('sharingfood', 20);
+    let postsArr = parser.getPosts('sharingfood', 300);
     for (let post of postsArr) {
         if (post.image != null && post.image != "" && post.text != null) {
             addPost(0, 0, 0, post.status, post.link, post.image, post.text, [], post.upload_time)
@@ -225,7 +231,7 @@ bot.on('text', msg => {
 
         case 'Создать объявление':
 
-            addPost(msg.from.id, 0, msg.message_id, 1)
+            addPost(msg.from.id, 0, msg.message_id, -1)
             replyMarkup = bot.keyboard([
                 ['Создать объявление', 'Настройки']
             ], {resize: true});
