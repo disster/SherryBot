@@ -3,7 +3,7 @@ exports.getPosts = function (group, totalCount) {
     let xhr = new XMLHttpRequest();
     let token = 'db948772db948772db948772dcdbe635baddb94db94877285796a874e9a0d9f41f4c77a';
     let version = '5.110';
-    let count = 100;
+    let count = 1;
     let offset = 0;
     let posts = [];
     while (offset < totalCount) {
@@ -26,6 +26,7 @@ exports.getPosts = function (group, totalCount) {
             }
             let postUrl = `https://vk.com/sharingfood?w=wall${data[i].owner_id}_${data[i].id}`;
             let status = 0;
+            let words = ['забрал']
             // if (!data[i].text.toLowerCase().match(/(^|\A|\s|\-)[Зз]абр(али|ал|ала|ало)?[^а-яА-Я]*?(\s|$|\Z|\-)/)) {
             //     status = 3;
             // }
@@ -37,7 +38,7 @@ exports.getPosts = function (group, totalCount) {
                 text: data[i].text
             }
         }
-        offset += 100;
+        offset++;
         posts = posts.concat(data);
     }
     return posts;
