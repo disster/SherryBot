@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/TheRagerghost/SherryBot#readme",
   "dependencies": {
+    "firebase": "^7.15.3",
+    "mongoose": "^5.9.19",
     "node-telegram-bot-api": "^0.50.0",
     "telebot": "^1.4.0"
   }
