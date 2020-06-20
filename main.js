@@ -256,7 +256,6 @@ bot.on('text', msg => {
         ], {resize: true});
       }
       return bot.sendMessage(msg.from.id, 'Возвращаю в главное меню.', {replyMarkup});
-
     default:
   }
 });
@@ -279,5 +278,5 @@ bot.on('location', msg => {
 
   return bot.sendMessage(msg.from.id, 'Местоположение установлено!', {replyMarkup});
 });
-
+//setPostsInDb();
 bot.start();
