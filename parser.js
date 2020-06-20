@@ -14,10 +14,12 @@ exports.getPosts = function (group, totalCount) {
         for (let i = 0; i < data.length; i++) {
             let images = [];
             if (data[i].attachments) {
-                if (data[i].attachments[0].type == 'photo') {
-                    for (let image of data[i].attachments[0].photo.sizes) {
-                        if (image.type == 'y') {
-                            images.push(image.url);
+                for (let attachment of data[i].attachments) {
+                    if (attachment.type == 'photo') {
+                        for (let image of attachment.photo.sizes) {
+                            if (image.type == 'y') {
+                                images.push(image.url);
+                            }
                         }
                     }
                 }
@@ -35,6 +37,3 @@ exports.getPosts = function (group, totalCount) {
     }
     return posts;
 }
-
-
-
