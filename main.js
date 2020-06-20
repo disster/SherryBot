@@ -161,7 +161,9 @@ function calcDistOnGlobe(long1, lat1, long2, lat2) {
 function setPostsInDb(){
   let parser = require("./parser");
   let postsArr = parser.getPosts('sharingfood', 500);
-  console.log(postsArr);
+  for (let post of postsArr){
+      addPost(0,0,0, post.status, post.link, post.image, post.text, [], post.upload_time)
+  }
 }
 ///////////////////////////////////////////////////////////////
 //                          BOT
@@ -170,6 +172,10 @@ function setPostsInDb(){
 let lastInlineMsgID = 0;
 
 bot.on("polling_error", (m) => console.log(m));
+
+bot.on('/fill_vk_posts', msg=>{
+  setPostsInDb();
+})
 
 bot.on(['/start','/role'], msg => {
 
