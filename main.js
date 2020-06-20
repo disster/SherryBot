@@ -167,7 +167,7 @@ function calcDistOnGlobe(long1, lat1, long2, lat2) {
 
 function setPostsInDb() {
     let parser = require("./parser");
-    let postsArr = parser.getPosts('sharingfood', 50);
+    let postsArr = parser.getPosts('sharingfood', 20);
     for (let post of postsArr) {
         if (post.image != null && post.image != "" && post.text != null) {
             addPost(0, 0, 0, post.status, post.link, post.image, post.text, [], post.upload_time)
