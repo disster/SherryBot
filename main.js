@@ -30,7 +30,8 @@ function addUser(u_id) {
         status: false,
         donee_rating: 0,
         donor_rating: 0,
-        priority: 0
+        priority: 0,
+        geo: { long: 0.0, lat: 0.0}
       });
     return true;
   }));
@@ -44,13 +45,33 @@ function setUserStatus(s, u_id){
   });
 }
 
+function setUserGeo(u_id, long, lat){
+  console.log("User " + u_id + " geo is set!");
+  users.orderByChild("user_id").equalTo(u_id).on("child_added", snapshot => {
+    //console.log(snapshot.key);
+    users.child(snapshot.key).update({geo: { long: long, lat: lat}});
+  });
+}
+
 function getUserPropertyValue(u_id, val_name) {
 
+  var r = null;
+
+  users.orderByChild("user_id").equalTo(u_id).on("child_added", snapshot => {
+    users.child(snapshot.key + '/' + val_name).orderByChild(val_name).once("value", snapshot => {
+      console.log("Func ref: " + snapshot.key + " --- Func val: " + snapshot.val());
+      r = snapshot.val();
+    });
+  });
+
+  return r;
 }
 
 ///////////////////////////////////////////////////////////////
 //                          BOT
 ///////////////////////////////////////////////////////////////
+
+let lastInlineMsgID = 0;
 
 bot.on("polling_error", (m) => console.log(m));
 
@@ -103,15 +124,52 @@ bot.on('text', msg => {
   switch (msg.text) {
     case 'Настройки':
       replyMarkup = bot.keyboard([
-        ['Локация','Назад']
+        [bot.button('location', 'Установить местоположение')],
+        ['Сменить роль'],
+        ['Назад']
       ], {resize: true});
-        console.log(getUserPropertyValue(msg.from.id, "status"));
-      return bot.sendMessage(msg.from.id, 'Доступные настройки:', {replyMarkup});
+      return bot.sendMessage(msg.from.id, 'Открываю меню настроек.', {replyMarkup});
+
+    case 'Сменить роль':
+      replyMarkup = bot.inlineKeyboard([
+        [bot.inlineButton('Я отдаю', {callback: 'donor'})],
+        [bot.inlineButton('Я принимаю', {callback: 'donee'})]
+      ]);
+      return bot.sendMessage(msg.from.id, 'Выбор роли:', {replyMarkup});
+
+    case 'Назад':
+      if(getUserPropertyValue(msg.from.id, "status")){
+        replyMarkup = bot.keyboard([
+          ['Создать объявление','Настройки']
+        ], {resize: true});
+      } else {
+        replyMarkup = bot.keyboard([
+          ['Поиск','Настройки']
+        ], {resize: true});
+      }
+      return bot.sendMessage(msg.from.id, 'Возвращаю в главное меню.', {replyMarkup});
+
     default:
-      return bot.sendMessage(msg.from.id, 'Дефолт', {replyMarkup});
+  }
+});
+
+bot.on('location', msg => {
+
+  let replyMarkup = null;
+
+  if(getUserPropertyValue(msg.from.id, "status")){
+    replyMarkup = bot.keyboard([
+      ['Создать объявление','Настройки']
+    ], {resize: true});
+  } else {
+    replyMarkup = bot.keyboard([
+      ['Поиск','Настройки']
+    ], {resize: true});
   }
 
+  setUserGeo(msg.from.id, msg.location.longitude, msg.location.latitude);
 
+  return bot.sendMessage(msg.from.id, 'Местоположение установлено!', {replyMarkup});
 });
 
 bot.start();
