@@ -167,9 +167,9 @@ function calcDistOnGlobe(long1, lat1, long2, lat2) {
 
 function setPostsInDb() {
     let parser = require("./parser");
-    let postsArr = parser.getPosts('sharingfood', 500);
+    let postsArr = parser.getPosts('sharingfood', 10);
     for (let post of postsArr) {
-        if (post.image != "") {
+        if (post.image != null && post.image != "" && post.text != null) {
             addPost(0, 0, 0, post.status, post.link, post.image, post.text, [], post.upload_time)
         }
     }
@@ -232,6 +232,8 @@ bot.on('text', msg => {
         case 'Поиск':
 
             let p = matchPostByTag();
+
+            console.log(p);
 
             if (p.status == 0) {
                 replyMarkup = bot.inlineKeyboard([
