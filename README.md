@@ -13,3 +13,5 @@
 - Язык программирования JavaScript с использованием Node.js;
 - Realtime database Firebase;
 - Используется Telegram Bot API и API ВКонтакте.
+
+## Риализованый патанцевал:
