@@ -33,6 +33,7 @@ const app = firebase.initializeApp({
 
 const ref = firebase.database().ref();
 const users = ref.child("users");
+const posts = ref.child("posts");
 
 function addUser(u_id) {
   if(users.orderByChild("user_id").equalTo(u_id).once("value",snapshot => {
@@ -81,8 +82,9 @@ function getUserPropertyValue(u_id, val_name) {
   return r;
 }
 
-function addPost(u_id = 0, d_id = 0, msg_id = 0, status = -1, link = '', img = '', text = '', tags = []) {
-    console.log("Adding post " + u_id);
+function addPost(u_id = 0, d_id = 0, msg_id = 0, status = -1, link = '', img = '', text = '', tags = [], dt = null) {
+    if(dt == null) dt = Math.round(new Date() / 1000);
+    console.log("Adding post " + msg_id + " at " + dt);
     posts.push().set({
         donor_id: u_id,
         donee_id: d_id,
@@ -91,13 +93,67 @@ function addPost(u_id = 0, d_id = 0, msg_id = 0, status = -1, link = '', img = '
         link: link,
         image: img,
         text: text,
-        tags: tags
+        tags: tags,
+        upload_time: dt
       });
-  }));
 }
 
-function getPost() {
+function matchPostByTag(tag, loc, dist){
 
+  function pair(key, val) {
+    this.key = key;
+    this.val = val;
+  }
+
+  let p = new Post();
+
+  let list = [];
+
+  posts.on('child_added', (snapshot) => { snapshot.forEach((child) => {
+    if(child.key == 'status')
+      if (child.val() == 1 || child.val() == 0)
+      {
+        let k = child.ref.parent.key;
+        let v;
+        posts.child(k + '/upload_time').once('value', (snapshot) => { v = snapshot.val();});
+        list.push(new pair(k, v));
+      }
+  })});
+
+  list.sort(function(a,b) {return a.val - b.val});
+
+  if(list[0] == undefined)
+    return p;
+
+  console.log(list[0]);
+
+  let firstSnap;
+  posts.child(list[0].key).once('value', (snapshot) => { firstSnap = snapshot;});
+
+  p.donor_id = u_id;
+  p.donee_id = d_id;
+  p.message_id = msg_id;
+  p.status = status;
+  p.link = link;
+  p.image = img;
+  p.text = text;
+  p.tags = tags;
+
+  return p;
+}
+
+function calcDistOnGlobe(long1, lat1, long2, lat2) {
+  var R = 6371;
+
+  var dLat = (lat2-lat1).toRad();
+  var dLong = (long2-long1).toRad();
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) *
+                    Math.sin(dLong/2) * Math.sin(dLong/2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  var dist = R * c;
+
+  return Math.round(dist);
 }
 
 function setPostsInDb(){
@@ -134,7 +190,7 @@ bot.on('callbackQuery', msg => {
             ['Создать объявление','Настройки']
           ], {resize: true});
         return bot.sendMessage(msg.from.id, 'Роль установлена на отдающего!', {replyMarkup});
-        
+
       case 'donee':
           setUserStatus(false, msg.from.id);
           replyMarkup = bot.keyboard([
@@ -149,6 +205,23 @@ bot.on('text', msg => {
   let replyMarkup = null;
 
   switch (msg.text) {
+
+    case 'Создать объявление':
+
+      addPost(0,0,0,1);
+      replyMarkup = bot.keyboard([
+        ['Создать объявление','Настройки']
+      ], {resize: true});
+      return bot.sendMessage(msg.from.id, 'Объявление создано!', {replyMarkup});
+
+    case 'Поиск':
+
+      matchPostByTag('lol');
+      replyMarkup = bot.keyboard([
+        ['Поиск','Настройки']
+      ], {resize: true});
+      return bot.sendMessage(msg.from.id, 'Объявления найдены!', {replyMarkup});
+
     case 'Настройки':
       replyMarkup = bot.keyboard([
         [bot.button('location', 'Установить местоположение')],
@@ -200,4 +273,3 @@ bot.on('location', msg => {
 });
 
 bot.start();
-
