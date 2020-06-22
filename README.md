@@ -1,7 +1,7 @@
 # SherryBot
 ## Фудшеринг телеграм-бот. [@FoodSherryBot](https://t.me/FoodSherryBot)
 
-<p align="center"><img src="Design/avatar.png" width="256"></p>
+<p align="center"><img src="avatar.png" width="256"></p>
 
 ## Описание
 
